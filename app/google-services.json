@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "932548603948",
+    "firebase_url": "https://potok-soznaniya-44709-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "potok-soznaniya-44709",
+    "storage_bucket": "potok-soznaniya-44709.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932548603948:android:97cd9242da5219f2c9e189",
+        "android_client_info": {
+          "package_name": "com.fictiveds.potoksoznaniya"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "932548603948-04vkv4j1oac89me1rkst1ku2vd37uotp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fictiveds.potoksoznaniya",
+            "certificate_hash": "ef9b9402bea8a53b1bedfdb018caf17e9a8bb04a"
+          }
+        },
+        {
+          "client_id": "932548603948-p0gom3ookbct3u3sc002oertedmjohdb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbPfrEBbGa_8RXpFmXyHqDp4IQ_f6toJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "932548603948-p0gom3ookbct3u3sc002oertedmjohdb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

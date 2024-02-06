@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stream of Consciousness</string>
+    <string name="login_hint">E-mail</string>
+    <string name="password_hint">Enter password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
+    <string name="confirm_password_hint">Enter the password again</string>
+    <string name="username_hint">E-mail</string>
+    <string name="google_sign_in">Sign in with Google</string>
+    <string name="default_web_client_id">932548603948-p0gom3ookbct3u3sc002oertedmjohdb.apps.googleusercontent.com</string>
+    <string name="username1_hint">Enter username</string>
+    <string name="change_profile_photo">Change profile photo</string>
+    <string name="save_changes">Save changes</string>
+    <string name="tvUsname">Username</string>
+    <string name="edit_profile_image">Edit profile image</string>
+    <string name="profile_image">Profile image</string>
+    <string name="username">Username:</string>
+    <string name="edit_username">Edit username</string>
+    <string name="email">E-mail:</string>
+    <string name="logout">Log out</string>
+    <string name="old_password">Enter current password</string>
+    <string name="new_password">Enter new password</string>
+    <string name="change_password">Change password</string>
+    <string name="cancel">Cancel</string>
+    <string name="e_mail_s">E-mail: %s</string>
+    <string name="err_load">Loading error:</string>
+    <string name="err_load_image">Image loading error:</string>
+    <string name="del_photo">Delete photo</string>
+    <string name="new_pass_must">New password must not match the old one.</string>
+    <string name="inc_old_pass">Incorrect old password.</string>
+    <string name="take_photo">Take a photo</string>
+    <string name="pass_ok">Password changed successfully.</string>
+    <string name="err_field_empty">Fields cannot be empty.</string>
+    <string name="download_from_gallery">Download from gallery</string>
+    <string name="pass_err">Password change error.</string>
+    <string name="edit_prof_pic">Edit profile photo</string>
+    <string name="upload_failed_">Upload failed:</string>
+    <string name="err_deleted">Deletion error:</string>
+    <string name="profile_photo_deleted">Profile photo deleted.</string>
+    <string name="default_username">User</string>
+    <string name="enter_valid_email">Enter a valid email address</string>
+    <string name="auth_err">Authentication error:</string>
+    <string name="unk_auth_err">Unknown authentication error</string>
+    <string name="pass_6_characters">Password must be at least 6 characters long</string>
+    <string name="enter_email_pass">Enter email and password</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="pass_dont_match">Passwords do not match</string>
+    <string name="apply">Apply</string>
+    <string name="product_name">Product Name</string>
+    <string name="product_description">Product Description</string>
+    <string name="add_product">Add product</string>
+    <string name="product_card">Product Card</string>
+    <string name="product_added_successfully">Product added successfully</string>
+    <string name="failed_to_add_product">Failed to add product</string>
+    <string name="name_description_empty">Name and description cannot be empty</string>
+    <string name="product_price">Product price</string>
+    <string name="choose_image">Select a picture</string>
+    <string name="product_image">Product image</string>
+    <string name="upload_failed">Upload failed: %1$s</string>
+    <string name="please_fill_all_fields">Please fill out all fields and choose an image</string>
+    <string name="product_deleted_successfully">Product deleted successfully</string>
+    <string name="failed_to_delete_product">Failed to delete product</string>
+
+
+</resources>
