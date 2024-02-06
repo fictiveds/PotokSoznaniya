@@ -3,6 +3,7 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +12,9 @@ import com.fictiveds.potoksoznaniya.R;
 import com.fictiveds.potoksoznaniya.UI.Product;
 import com.fictiveds.potoksoznaniya.UI.ProductAdapter;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -48,6 +52,57 @@ public class ProductCardActivity extends AppCompatActivity {
 
         buttonAddProduct.setOnClickListener(v -> addProductToDatabase());
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        attachDatabaseReadListener();
+    }
+
+    private void attachDatabaseReadListener() {
+        mDatabaseRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
+                Product product = dataSnapshot.getValue(Product.class);
+                if (product != null) {
+                    productList.add(product);
+                    productAdapter.notifyItemInserted(productList.size() - 1);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                // Здесь можно реализовать логику для обновления UI после удаления элемента, если нужно
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProductCardActivity.this, "Failed to load products.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setupDeleteButton(ProductAdapter.ProductViewHolder holder, final int position) {
+        holder.buttonDeleteProduct.setOnClickListener(v -> {
+            Product product = productList.get(position);
+            String productId = product.getId();
+            if (productId != null) {
+                mDatabaseRef.child(productId).removeValue().addOnSuccessListener(aVoid -> {
+                    productAdapter.removeProduct(position);
+                    Toast.makeText(ProductCardActivity.this, "Product deleted successfully", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(ProductCardActivity.this, "Failed to delete product: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
 
     private void addProductToDatabase() {
         String name = editTextProductName.getText().toString().trim();

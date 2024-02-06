@@ -50,10 +50,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         notifyDataSetChanged();
     }
 
-    static class ProductViewHolder extends RecyclerView.ViewHolder {
+    public void removeProduct(int position) {
+        productList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+
+    public static class ProductViewHolder extends RecyclerView.ViewHolder {
 
         TextView textViewProductName, textViewProductDescription, textViewProductPrice;
-        MaterialButton buttonDeleteProduct;
+        public MaterialButton buttonDeleteProduct;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
