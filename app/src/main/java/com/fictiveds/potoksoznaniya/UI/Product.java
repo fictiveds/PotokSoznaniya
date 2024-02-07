@@ -12,12 +12,11 @@ public class Product {
     }
 
     // Конструктор с параметрами для инициализации объекта Product
-    public Product(String id, String name, String description, double price, String imageUrl) {
+    public Product(String id, String name, String description, double price) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.imageUrl = imageUrl;
     }
 
     // Геттеры и сеттеры
@@ -53,11 +52,4 @@ public class Product {
         this.price = price;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }

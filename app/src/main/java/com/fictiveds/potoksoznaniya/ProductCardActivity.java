@@ -60,7 +60,7 @@ public class ProductCardActivity extends AppCompatActivity {
     }
 
     private void attachDatabaseReadListener() {
-        mDatabaseRef.addChildEventListener(new ChildEventListener() {
+        ChildEventListener childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
                 Product product = dataSnapshot.getValue(Product.class);
@@ -71,22 +71,58 @@ public class ProductCardActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {}
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {
+                // Обновление товара, если есть изменения
+                Product product = dataSnapshot.getValue(Product.class);
+                if (product != null) {
+                    int indexToUpdate = -1;
+                    for (int i = 0; i < productList.size(); i++) {
+                        if (productList.get(i).getId().equals(product.getId())) {
+                            indexToUpdate = i;
+                            break;
+                        }
+                    }
+                    if (indexToUpdate != -1) {
+                        productList.set(indexToUpdate, product);
+                        productAdapter.notifyItemChanged(indexToUpdate);
+                    }
+                }
+            }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                // Здесь можно реализовать логику для обновления UI после удаления элемента, если нужно
+                // Удаление товара из списка
+                Product product = dataSnapshot.getValue(Product.class);
+                if (product != null) {
+                    int indexToRemove = -1;
+                    for (int i = 0; i < productList.size(); i++) {
+                        if (productList.get(i).getId().equals(product.getId())) {
+                            indexToRemove = i;
+                            break;
+                        }
+                    }
+                    if (indexToRemove != -1) {
+                        productList.remove(indexToRemove);
+                        productAdapter.notifyItemRemoved(indexToRemove);
+                    }
+                }
             }
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {}
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {
+                // Это событие происходит, если один из товаров переместился в списке
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(ProductCardActivity.this, "Failed to load products.", Toast.LENGTH_SHORT).show();
+                // Это событие происходит в случае ошибки
+                Toast.makeText(ProductCardActivity.this, "Failed to load products: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+
+        mDatabaseRef.addChildEventListener(childEventListener);
     }
+
 
     private void setupDeleteButton(ProductAdapter.ProductViewHolder holder, final int position) {
         holder.buttonDeleteProduct.setOnClickListener(v -> {
@@ -112,7 +148,7 @@ public class ProductCardActivity extends AppCompatActivity {
 
         if (!name.isEmpty() && !description.isEmpty()) {
             final String productId = mDatabaseRef.push().getKey();
-            Product product = new Product(productId, name, description, price, null); // imageUrl передаем null
+            Product product = new Product(productId, name, description, price); // imageUrl передаем null
             saveProductToDatabase(product);
         } else {
             Toast.makeText(this, "Name and description cannot be empty.", Toast.LENGTH_SHORT).show();
