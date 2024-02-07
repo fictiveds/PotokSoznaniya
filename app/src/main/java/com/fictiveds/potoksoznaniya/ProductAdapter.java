@@ -1,4 +1,4 @@
-package com.fictiveds.potoksoznaniya.UI;
+package com.fictiveds.potoksoznaniya;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,26 +8,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fictiveds.potoksoznaniya.R;
+import com.fictiveds.potoksoznaniya.UI.Product;
 import com.google.android.material.button.MaterialButton;
-
-import java.util.ArrayList;
+import com.google.firebase.database.DatabaseReference;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
-
+    private Context mCtx;
     private List<Product> productList;
-    private Context context;
+    private DatabaseReference databaseReference;
 
-    public ProductAdapter(Context context, List<Product> productList) {
-        this.context = context;
-        this.productList = new ArrayList<>(productList);
+    public ProductAdapter(Context mCtx, List<Product> productList, DatabaseReference databaseReference) {
+        this.mCtx = mCtx;
+        this.productList = productList;
+        this.databaseReference = databaseReference;
     }
 
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.product_item, parent, false);
+        View view = LayoutInflater.from(mCtx).inflate(R.layout.product_item, parent, false);
         return new ProductViewHolder(view);
     }
 
@@ -37,7 +37,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.textViewProductName.setText(product.getName());
         holder.textViewProductDescription.setText(product.getDescription());
         holder.textViewProductPrice.setText(String.valueOf(product.getPrice()));
-        // Изображение больше не отображается
+
+        holder.buttonDeleteProduct.setOnClickListener(view -> {
+            databaseReference.child(product.getId()).removeValue();
+        });
     }
 
     @Override
@@ -45,29 +48,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    public void addProduct(Product product) {
-        productList.add(product);
-        notifyDataSetChanged();
-    }
-
-    public void removeProduct(int position) {
-        productList.remove(position);
-        notifyItemRemoved(position);
-    }
-
-
-    public static class ProductViewHolder extends RecyclerView.ViewHolder {
-
+    class ProductViewHolder extends RecyclerView.ViewHolder {
         TextView textViewProductName, textViewProductDescription, textViewProductPrice;
-        public MaterialButton buttonDeleteProduct;
+        MaterialButton buttonDeleteProduct;
 
-        public ProductViewHolder(@NonNull View itemView) {
+        public ProductViewHolder(View itemView) {
             super(itemView);
+
             textViewProductName = itemView.findViewById(R.id.textViewProductName);
             textViewProductDescription = itemView.findViewById(R.id.textViewProductDescription);
             textViewProductPrice = itemView.findViewById(R.id.textViewProductPrice);
             buttonDeleteProduct = itemView.findViewById(R.id.buttonDeleteProduct);
-            // Обработчик клика для buttonDeleteProduct, если нужен
         }
     }
 }
