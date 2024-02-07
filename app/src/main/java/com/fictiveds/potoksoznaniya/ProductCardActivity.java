@@ -16,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+import androidx.appcompat.widget.SearchView;
 
 public class ProductCardActivity extends AppCompatActivity {
     private TextInputEditText editTextProductName, editTextProductDescription, editTextProductPrice;
@@ -45,6 +46,20 @@ public class ProductCardActivity extends AppCompatActivity {
         recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewProducts.setAdapter(adapter);
 
+        SearchView searchView = findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return true;
+            }
+        });
+
         // Кнопка добавления продукта
         findViewById(R.id.buttonAddProduct).setOnClickListener(view -> addProduct());
 
@@ -52,12 +67,12 @@ public class ProductCardActivity extends AppCompatActivity {
         databaseProducts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                productList.clear();
+                List<Product> newProducts = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Product product = postSnapshot.getValue(Product.class);
-                    productList.add(product);
+                    newProducts.add(product);
                 }
-                adapter.notifyDataSetChanged();
+                adapter.updateProductList(newProducts); // Используем новый метод для обновления данных
             }
 
             @Override
@@ -65,6 +80,8 @@ public class ProductCardActivity extends AppCompatActivity {
                 Toast.makeText(ProductCardActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+
     }
 
     private void addProduct() {

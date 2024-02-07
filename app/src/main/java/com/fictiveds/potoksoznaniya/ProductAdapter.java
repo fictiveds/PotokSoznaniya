@@ -12,15 +12,20 @@ import com.fictiveds.potoksoznaniya.UI.Product;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DatabaseReference;
 import java.util.List;
+import android.widget.Filter;
+import android.widget.Filterable;
+import java.util.ArrayList;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> implements Filterable {
     private Context mCtx;
     private List<Product> productList;
+    private List<Product> productListFull;
     private DatabaseReference databaseReference;
 
     public ProductAdapter(Context mCtx, List<Product> productList, DatabaseReference databaseReference) {
         this.mCtx = mCtx;
         this.productList = productList;
+        productListFull = new ArrayList<>(productList);
         this.databaseReference = databaseReference;
     }
 
@@ -47,6 +52,52 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public int getItemCount() {
         return productList.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return productFilter;
+    }
+
+    private Filter productFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Product> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(productListFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (Product item : productListFull) {
+                    if (item.getName().toLowerCase().contains(filterPattern) || item.getDescription().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            productList.clear();
+            productList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
+    public void updateProductList(List<Product> newProducts) {
+        productList.clear();
+        productList.addAll(newProducts);
+        productListFull.clear();
+        productListFull.addAll(newProducts); // Обновляем полный список
+        notifyDataSetChanged();
+    }
+
 
     class ProductViewHolder extends RecyclerView.ViewHolder {
         TextView textViewProductName, textViewProductDescription, textViewProductPrice;
