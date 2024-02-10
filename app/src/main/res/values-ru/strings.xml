@@ -58,7 +58,9 @@
     <string name="choose_image">Выберите изображение</string>
     <string name="product_image">Изображение товара</string>
     <string name="upload_failed">Ошибка загрузки: %1$s</string>
-    <string name="please_fill_all_fields">Пожалуйста, заполните все поля и выберите изображение</string>
     <string name="product_deleted_successfully">Товар успешно удален</string>
     <string name="failed_to_delete_product">Не удалось удалить товар</string>
+    <string name="product_added">Товар добавлен</string>
+    <string name="please_fill_all_fields">Пожалуйста, заполните все поля</string>
+
 </resources>

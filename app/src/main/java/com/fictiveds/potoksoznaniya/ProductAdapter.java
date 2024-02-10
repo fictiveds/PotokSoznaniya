@@ -94,11 +94,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productList.clear();
         productList.addAll(newProducts);
         productListFull.clear();
-        productListFull.addAll(newProducts); // Обновляем полный список
+        productListFull.addAll(newProducts);
         notifyDataSetChanged();
     }
-
-
     class ProductViewHolder extends RecyclerView.ViewHolder {
         TextView textViewProductName, textViewProductDescription, textViewProductPrice;
         MaterialButton buttonDeleteProduct;

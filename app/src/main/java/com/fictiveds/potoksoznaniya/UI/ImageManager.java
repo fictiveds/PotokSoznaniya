@@ -20,14 +20,12 @@ public class ImageManager {
 
     private final Activity activity;
     private final ImageHandler imageHandler;
-    private final FirebaseAuth mAuth;
-    private final StorageReference storageRef;
 
     public ImageManager (Activity activity) {
         this.activity = activity;
-        this.mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         this.imageHandler = new ImageHandler(activity);
-        this.storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
     }
 
     public void handleActivityResult(int requestCode, int resultCode, Intent data, CircleImageView profileImage, String userId, ImageHandler.UploadCallback uploadCallback) {

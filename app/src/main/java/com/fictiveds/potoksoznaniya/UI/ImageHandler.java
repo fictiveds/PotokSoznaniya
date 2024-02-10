@@ -22,7 +22,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ImageHandler {
 
-    private Activity activity;
+    private final Activity activity;
     private static final int PERMISSION_CAMERA_REQUEST_CODE = 100;
     private static final int PERMISSION_GALLERY_REQUEST_CODE = 101;
     private static final int REQUEST_CODE_CAMERA = 102;
@@ -98,6 +98,7 @@ public class ImageHandler {
                 profileImage.setImageBitmap(bitmap);
 
                 // Получение Uri из Bitmap
+                assert bitmap != null;
                 Uri imageUri = getImageUri(activity, bitmap);
                 uploadImageToFirebaseStorage(imageUri, userId, uploadCallback);
             } else if (requestCode == REQUEST_CODE_GALLERY) {

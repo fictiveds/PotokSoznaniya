@@ -58,7 +58,9 @@
     <string name="choose_image">Sélectionnez une image</string>
     <string name="product_image">Image du produit</string>
     <string name="upload_failed">Échec du téléchargement : %1$s</string>
-    <string name="please_fill_all_fields">Veuillez remplir tous les champs et choisir une image</string>
     <string name="product_deleted_successfully">Produit supprimé avec succès</string>
     <string name="failed_to_delete_product">Échec de la suppression du produit</string>
+    <string name="product_added">Produit ajouté</string>
+    <string name="please_fill_all_fields">Veuillez remplir tous les champs</string>
+
 </resources>

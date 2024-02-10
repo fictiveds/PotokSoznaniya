@@ -15,7 +15,7 @@
     <string name="tvUsname">Username</string>
     <string name="edit_profile_image">Edit profile image</string>
     <string name="profile_image">Profile image</string>
-    <string name="username">Username:</string>
+    <string name="username">Username: %1$s</string>
     <string name="edit_username">Edit username</string>
     <string name="email">E-mail:</string>
     <string name="logout">Log out</string>
@@ -58,9 +58,8 @@
     <string name="choose_image">Select a picture</string>
     <string name="product_image">Product image</string>
     <string name="upload_failed">Upload failed: %1$s</string>
-    <string name="please_fill_all_fields">Please fill out all fields and choose an image</string>
     <string name="product_deleted_successfully">Product deleted successfully</string>
     <string name="failed_to_delete_product">Failed to delete product</string>
-
-
+    <string name="product_added">Product added</string>
+    <string name="please_fill_all_fields">Please fill all fields</string>
 </resources>

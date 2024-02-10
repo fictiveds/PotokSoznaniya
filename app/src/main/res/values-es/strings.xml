@@ -58,7 +58,8 @@
     <string name="choose_image">Seleccionar una imagen</string>
     <string name="product_image">Imagen del producto</string>
     <string name="upload_failed">Error de carga: %1$s</string>
-    <string name="please_fill_all_fields">Por favor, rellene todos los campos y elija una imagen</string>
     <string name="product_deleted_successfully">Producto eliminado con éxito</string>
     <string name="failed_to_delete_product">Error al eliminar el producto</string>
+    <string name="product_added">Producto añadido</string>
+    <string name="please_fill_all_fields">Por favor, rellene todos los campos</string>
 </resources>

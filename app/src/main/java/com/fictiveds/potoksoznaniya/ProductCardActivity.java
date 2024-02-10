@@ -72,7 +72,7 @@ public class ProductCardActivity extends AppCompatActivity {
                     Product product = postSnapshot.getValue(Product.class);
                     newProducts.add(product);
                 }
-                adapter.updateProductList(newProducts); // Используем новый метод для обновления данных
+                adapter.updateProductList(newProducts);
             }
 
             @Override
@@ -96,6 +96,9 @@ public class ProductCardActivity extends AppCompatActivity {
             if (id != null) {
                 databaseProducts.child(id).setValue(product);
                 Toast.makeText(this, "Product added", Toast.LENGTH_SHORT).show();
+                editTextProductName.setText("");
+                editTextProductDescription.setText("");
+                editTextProductPrice.setText("");
             }
         } else {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();

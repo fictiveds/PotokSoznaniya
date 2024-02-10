@@ -1,63 +1,76 @@
 package com.fictiveds.potoksoznaniya;
 
+import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.fictiveds.potoksoznaniya.UI.AnimationManager;
 import com.fictiveds.potoksoznaniya.UI.AuthManager;
 import com.fictiveds.potoksoznaniya.UI.DialogManager;
 import com.fictiveds.potoksoznaniya.UI.ImageHandler;
 import com.fictiveds.potoksoznaniya.UI.ImageManager;
 import com.fictiveds.potoksoznaniya.UI.UserProfileManager;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.location.FusedLocationProviderClient;
 
-import java.util.Locale;
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private TextView tvUsername, tvEmail;
+    private TextView tvUsername;
     private EditText etUsernameEdit;
     private CircleImageView profileImage;
-    private FirebaseAuth mAuth;
 
     private UserProfileManager userProfileManager;
     private ImageManager imageManager;
-    private ImageHandler imageHandler;
     private DialogManager dialogManager;
     private AuthManager authManager;
-    private AnimationManager animationManager;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userProfileManager = new UserProfileManager(this);
         imageManager = new ImageManager(this);
         dialogManager = new DialogManager(this, imageManager, profileImage);
         authManager = new AuthManager(this);
-        animationManager = new AnimationManager(this);
+        AnimationManager animationManager = new AnimationManager(this);
 
         tvUsername = findViewById(R.id.tvUsername);
         etUsernameEdit = findViewById(R.id.etUsernameEdit);
         ImageButton btnEditUsername = findViewById(R.id.btnEditUsername);
         ImageButton btnSaveUsername = findViewById(R.id.btnSaveUsername);
-        tvEmail = findViewById(R.id.tvEmail);
+        TextView tvEmail = findViewById(R.id.tvEmail);
         profileImage = findViewById(R.id.profileImage);
         ImageButton btnEditProfileImage = findViewById(R.id.btnEditProfileImage);
 
@@ -86,7 +99,7 @@ public class DashboardActivity extends AppCompatActivity {
             if (!newUsername.isEmpty() && user != null) {
                 userProfileManager.saveUsernameToFirebaseDatabase(user.getUid(), newUsername);
                 userProfileManager.saveUsernameToSharedPreferences(user.getUid(), newUsername);
-                tvUsername.setText(getString(R.string.username) + newUsername);
+                tvUsername.setText(String.format("%s%s", getString(R.string.username), newUsername));
                 toggleViewVisibility(etUsernameEdit, btnSaveUsername, tvUsername, btnEditUsername);
                // String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -118,6 +131,35 @@ public class DashboardActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        getLocationPermission();
+
+        findViewById(R.id.btnFindFriend).setOnClickListener(v -> {
+            Dialog dialog = new Dialog(DashboardActivity.this);
+            dialog.setContentView(R.layout.dialog_find_friend);
+
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                window.setGravity(Gravity.CENTER);
+            }
+            Button btnFind = dialog.findViewById(R.id.btnFind);
+
+            btnFind.setOnClickListener(view -> {
+                if (!locationPermissionGranted) {
+                    getLocationPermission();
+                } else {
+                    // Если разрешение уже есть, получаем геолокацию и сохраняем ее
+                    getCurrentLocationAndSave();
+                }
+            });
+
+
+            dialog.show();
+        });
+
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     private void toggleViewVisibility(View... views) {
@@ -151,5 +193,69 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+    // Метод для запроса разрешения
+    private void getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        locationPermissionGranted = false;
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
+                // Теперь мы можем безопасно вызвать метод для получения локации
+                getCurrentLocationAndSave();
+            } else {
+                // Обработка отказа пользователя предоставить разрешение
+                Toast.makeText(this, "Разрешение на геолокацию не предоставлено", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void getCurrentLocationAndSave() {
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Получаем последнюю известную локацию
+                        Location lastKnownLocation = task.getResult();
+                        if (lastKnownLocation != null) {
+                            // Здесь код для сохранения геолокации в Firebase
+                            saveLocationInFirebase(lastKnownLocation);
+                        }
+                    } else {
+                        Toast.makeText(DashboardActivity.this, "Невозможно получить текущее местоположение", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void saveLocationInFirebase(Location location) {
+        // Получаем ID текущего пользователя
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Сохраняем локацию в Firebase
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersLocation");
+        HashMap<String, Object> locationData = new HashMap<>();
+        locationData.put("latitude", location.getLatitude());
+        locationData.put("longitude", location.getLongitude());
+        ref.child(userId).setValue(locationData)
+                .addOnSuccessListener(aVoid -> Toast.makeText(DashboardActivity.this, "Локация сохранена в Firebase", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(DashboardActivity.this, "Ошибка при сохранении локации", Toast.LENGTH_SHORT).show());
+    }
 }

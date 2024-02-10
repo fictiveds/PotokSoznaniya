@@ -117,13 +117,26 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnFindFriend"
+        style="@style/CustomFilledBoxDense"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Найти друга"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnCardProduct"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"/>
+
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/logoutButton"
         style="@style/CustomFilledBoxDense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/logout"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnCardProduct"
+        app:layout_constraintTop_toBottomOf="@id/btnFindFriend"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
