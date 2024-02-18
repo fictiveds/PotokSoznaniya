@@ -1,5 +1,6 @@
 package com.fictiveds.potoksoznaniya.UI;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,35 +20,50 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class DialogManager {
 
-    private final Context context;
+    private final Activity activity;
     private final FirebaseAuth mAuth;
-    private final ImageManager imageManager;
-    private CircleImageView profileImage;
+    private final ImageHandler imageHandler;
+    private final CircleImageView profileImage;
 
-    public DialogManager(Context context, ImageManager imageManager, CircleImageView profileImage) {
-        this.context = context;
-        this.imageManager = imageManager;
+    public DialogManager(Activity activity, ImageHandler imageHandler, CircleImageView profileImage) {
+        this.activity = activity;
+        this.imageHandler = imageHandler;
         this.mAuth = FirebaseAuth.getInstance();
         this.profileImage = profileImage;
     }
 
     public void showEditProfileImageDialog() {
-        String[] options = {context.getString(R.string.take_photo), context.getString(R.string.download_from_gallery), context.getString(R.string.del_photo)};
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getString(R.string.edit_prof_pic));
+        String[] options = {activity.getString(R.string.take_photo), activity.getString(R.string.download_from_gallery), activity.getString(R.string.del_photo)};
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.edit_prof_pic));
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0: // Сделать фото
-                    imageManager.openCamera();
+                    imageHandler.openCamera();
                     break;
                 case 1: // Загрузить из галереи
-                    imageManager.openGallery();
+                    imageHandler.openGallery();
                     break;
                 case 2: // Удалить фото
                     FirebaseUser user = mAuth.getCurrentUser();
                     if (user != null) {
-                        imageManager.deleteProfileImageFromFirebaseStorage(user.getUid(), null);
-                        profileImage.setImageResource(R.drawable.ic_profile); // Устанавливаем изображение по умолчанию
+                        imageHandler.deleteProfileImageFromFirebaseStorage(user.getUid(), profileImage, new ImageHandler.DeleteCallback() {
+                            @Override
+                            public void onDeleteSuccess() {
+                                activity.runOnUiThread(() -> {
+                                    if (profileImage != null) {
+                                        profileImage.setImageResource(R.drawable.ic_profile); // Устанавливаем изображение по умолчанию
+                                    }
+                                    Toast.makeText(activity, activity.getString(R.string.profile_photo_deleted), Toast.LENGTH_SHORT).show();
+                                });
+                            }
+
+                            @Override
+                            public void onDeleteFailure(Exception exception) {
+                                // Обработка ошибки удаления
+                                activity.runOnUiThread(() -> Toast.makeText(activity, activity.getString(R.string.err_deleted) + exception.getMessage(), Toast.LENGTH_SHORT).show());
+                            }
+                        });
                     }
                     break;
             }
@@ -55,9 +71,12 @@ public class DialogManager {
         builder.show();
     }
 
+
+
+
     public void showChangePasswordDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        LayoutInflater inflater = LayoutInflater.from(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = LayoutInflater.from(activity);
         View view = inflater.inflate(R.layout.dialog_change_password, null);
         builder.setView(view);
 
@@ -76,7 +95,7 @@ public class DialogManager {
 
             if (!oldPassword.isEmpty() && !newPassword.isEmpty()) {
                 if (oldPassword.equals(newPassword)) {
-                    Toast.makeText(context, context.getString(R.string.new_pass_must), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, activity.getString(R.string.new_pass_must), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -87,19 +106,19 @@ public class DialogManager {
                         if (task.isSuccessful()) {
                             user.updatePassword(newPassword).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
-                                    Toast.makeText(context, context.getString(R.string.pass_ok), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, activity.getString(R.string.pass_ok), Toast.LENGTH_SHORT).show();
                                     dialog.dismiss();
                                 } else {
-                                    Toast.makeText(context, context.getString(R.string.pass_err), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, activity.getString(R.string.pass_err), Toast.LENGTH_SHORT).show();
                                 }
                             });
                         } else {
-                            Toast.makeText(context, context.getString(R.string.inc_old_pass), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(activity, activity.getString(R.string.inc_old_pass), Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
             } else {
-                Toast.makeText(context, context.getString(R.string.err_field_empty), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, activity.getString(R.string.err_field_empty), Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -67,12 +67,15 @@ public class ProductCardActivity extends AppCompatActivity {
         databaseProducts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<Product> newProducts = new ArrayList<>();
+                productList.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Product product = postSnapshot.getValue(Product.class);
-                    newProducts.add(product);
+                    if (product != null) {
+                        product.setKey(postSnapshot.getKey()); // Здесь ты устанавливаешь ключ для объекта
+                        productList.add(product);
+                    }
                 }
-                adapter.updateProductList(newProducts);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -80,6 +83,8 @@ public class ProductCardActivity extends AppCompatActivity {
                 Toast.makeText(ProductCardActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+
 
 
     }
@@ -92,7 +97,7 @@ public class ProductCardActivity extends AppCompatActivity {
             double price = Double.parseDouble(priceString);
             String id = databaseProducts.push().getKey();
 
-            Product product = new Product(id, name, description, price);
+            Product product = new Product(name, description, price);
             if (id != null) {
                 databaseProducts.child(id).setValue(product);
                 Toast.makeText(this, "Product added", Toast.LENGTH_SHORT).show();

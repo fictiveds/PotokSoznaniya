@@ -14,6 +14,8 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.List;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> implements Filterable {
@@ -44,8 +46,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.textViewProductPrice.setText(String.valueOf(product.getPrice()));
 
         holder.buttonDeleteProduct.setOnClickListener(view -> {
-            databaseReference.child(product.getId()).removeValue();
+            // Получаем ключ товара
+            String key = product.getKey();
+            if (key != null) {
+                databaseReference.child(key).removeValue().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(mCtx, "Product removed", Toast.LENGTH_SHORT).show();
+                        // Обновление списка товаров, если необходимо
+                    } else {
+                        Toast.makeText(mCtx, "Failed to remove product", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         });
+
     }
 
     @Override

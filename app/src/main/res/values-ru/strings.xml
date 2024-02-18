@@ -15,7 +15,7 @@
     <string name="tvUsname">Имя пользователя</string>
     <string name="edit_profile_image">Редактировать изображение профиля</string>
     <string name="profile_image">Изображение профиля</string>
-    <string name="username">Имя пользователя:</string>
+    <string name="username">Имя пользователя: </string>
     <string name="edit_username">Редактировать имя пользователя</string>
     <string name="email">E-mail:</string>
     <string name="logout">Выйти из личного кабинета</string>

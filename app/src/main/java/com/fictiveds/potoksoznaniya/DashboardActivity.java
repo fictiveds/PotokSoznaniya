@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.room.Room;
 
 import android.view.Gravity;
 import android.view.View;
@@ -21,7 +22,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.appodeal.ads.Appodeal;
+import com.appodeal.ads.InterstitialCallbacks;
 import com.fictiveds.potoksoznaniya.UI.AnimationManager;
+import com.fictiveds.potoksoznaniya.UI.AppDatabase;
 import com.fictiveds.potoksoznaniya.UI.AuthManager;
 import com.fictiveds.potoksoznaniya.UI.DialogManager;
 import com.fictiveds.potoksoznaniya.UI.ImageHandler;
@@ -37,8 +42,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -47,12 +55,13 @@ public class DashboardActivity extends AppCompatActivity {
     private CircleImageView profileImage;
 
     private UserProfileManager userProfileManager;
-    private ImageManager imageManager;
+    private ImageHandler imageHandler;
     private DialogManager dialogManager;
     private AuthManager authManager;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
     private FusedLocationProviderClient fusedLocationProviderClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +70,13 @@ public class DashboardActivity extends AppCompatActivity {
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userProfileManager = new UserProfileManager(this);
-        imageManager = new ImageManager(this);
-        dialogManager = new DialogManager(this, imageManager, profileImage);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").build();
+        imageHandler = new ImageHandler(this, executorService, db);
+        dialogManager = new DialogManager(this, imageHandler, profileImage);
         authManager = new AuthManager(this);
         AnimationManager animationManager = new AnimationManager(this);
+        Appodeal.show(this, Appodeal.BANNER_BOTTOM);
 
         tvUsername = findViewById(R.id.tvUsername);
         etUsernameEdit = findViewById(R.id.etUsernameEdit);
@@ -73,6 +85,7 @@ public class DashboardActivity extends AppCompatActivity {
         TextView tvEmail = findViewById(R.id.tvEmail);
         profileImage = findViewById(R.id.profileImage);
         ImageButton btnEditProfileImage = findViewById(R.id.btnEditProfileImage);
+        Appodeal.cache(this, Appodeal.INTERSTITIAL);
 
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -82,7 +95,7 @@ public class DashboardActivity extends AppCompatActivity {
                     tvUsername.setText(username);
                 }
             });
-            imageManager.loadProfileImageFromFirebaseStorage(user.getUid(), profileImage, null);
+            imageHandler.loadProfileImageFromFirebaseStorage(user.getUid(), profileImage, null);
         }
 
         btnEditUsername.setOnClickListener(v -> {
@@ -98,7 +111,7 @@ public class DashboardActivity extends AppCompatActivity {
             String newUsername = etUsernameEdit.getText().toString();
             if (!newUsername.isEmpty() && user != null) {
                 userProfileManager.saveUsernameToFirebaseDatabase(user.getUid(), newUsername);
-                userProfileManager.saveUsernameToSharedPreferences(user.getUid(), newUsername);
+               // userProfileManager.saveUsernameToSharedPreferences(user.getUid(), newUsername);
                 tvUsername.setText(String.format("%s%s", getString(R.string.username), newUsername));
                 toggleViewVisibility(etUsernameEdit, btnSaveUsername, tvUsername, btnEditUsername);
                // String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -124,13 +137,79 @@ public class DashboardActivity extends AppCompatActivity {
         btnEditProfileImage.setOnClickListener(v -> dialogManager.showEditProfileImageDialog());
 
         MaterialButton btnCardProduct = findViewById(R.id.btnCardProduct);
-        btnCardProduct.setOnClickListener(new View.OnClickListener() {
+/*        btnCardProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(DashboardActivity.this, ProductCardActivity.class);
                 startActivity(intent);
             }
+        });*/
+
+        btnCardProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Проверяем, загружена ли интерстициальная реклама
+                if (Appodeal.isLoaded(Appodeal.INTERSTITIAL)) {
+                    // Устанавливаем обратный вызов
+                    Appodeal.setInterstitialCallbacks(new InterstitialCallbacks() {
+                        @Override
+                        public void onInterstitialLoaded(boolean isPrecache) {
+                            // Реклама загружена, это место для логгирования или статистики, если требуется
+                        }
+
+                        @Override
+                        public void onInterstitialFailedToLoad() {
+                            // Реклама не загрузилась, переходим на активность
+                            startProductCardActivity();
+                        }
+
+                        @Override
+                        public void onInterstitialShown() {
+                            // Реклама показана, это место для логгирования или статистики, если требуется
+                        }
+
+                        @Override
+                        public void onInterstitialClicked() {
+                            // Реклама кликнута, это место для логгирования или статистики, если требуется
+                        }
+
+                        @Override
+                        public void onInterstitialClosed() {
+                            // Пользователь закрыл рекламу, переходим на ProductCardActivity
+                            startProductCardActivity();
+                        }
+
+                        @Override
+                        public void onInterstitialShowFailed() {
+                            // Показ рекламы не удался, переходим на активность
+                            startProductCardActivity();
+                        }
+
+                        @Override
+                        public void onInterstitialExpired() {
+                            // Реклама "просрочилась" и не может быть показана
+                            // Это случается, если реклама была загружена, но слишком долго не показывалась
+                            startProductCardActivity();
+                        }
+                    });
+
+                    // Показываем рекламу
+                    Appodeal.show(DashboardActivity.this, Appodeal.INTERSTITIAL);
+                } else {
+                    // Реклама не загружена, сразу переходим на ProductCardActivity
+                    startProductCardActivity();
+                }
+            }
+
+            private void startProductCardActivity() {
+                // Удаляем обратные вызовы, чтобы избежать повторных вызовов
+                Appodeal.setInterstitialCallbacks(null);
+                Intent intent = new Intent(DashboardActivity.this, ProductCardActivity.class);
+                startActivity(intent);
+            }
         });
+
+
 
         getLocationPermission();
 
@@ -176,7 +255,7 @@ public class DashboardActivity extends AppCompatActivity {
         if (user != null && resultCode == RESULT_OK) {
             String userId = user.getUid();
 
-            imageManager.handleActivityResult(requestCode, resultCode, data, profileImage, userId, new ImageHandler.UploadCallback() {
+            imageHandler.handleActivityResult(requestCode, resultCode, data, profileImage, userId, new ImageHandler.UploadCallback() {
                 @Override
                 public void onUploadSuccess(Uri downloadUri) {
                     // Изображение успешно загружено и обновлено в интерфейсе пользователя

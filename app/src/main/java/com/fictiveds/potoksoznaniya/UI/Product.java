@@ -1,31 +1,33 @@
 package com.fictiveds.potoksoznaniya.UI;
 
+import com.google.firebase.database.Exclude;
+
 public class Product {
-    private String id;
+   private String key;
     private String name;
     private String description;
     private double price;
-    private String imageUrl;
 
     // Конструктор по умолчанию необходим для Firebase
     public Product() {
     }
 
     // Конструктор с параметрами для инициализации объекта Product
-    public Product(String id, String name, String description, double price) {
-        this.id = id;
+    public Product(String name, String description, double price) {
         this.name = name;
         this.description = description;
         this.price = price;
     }
 
     // Геттеры и сеттеры
-    public String getId() {
-        return id;
+
+    @Exclude
+    public String getKey() {
+        return key;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getName() {
@@ -51,5 +53,6 @@ public class Product {
     public void setPrice(double price) {
         this.price = price;
     }
+
 
 }
